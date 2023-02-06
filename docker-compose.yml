@@ -9,6 +9,8 @@ services:
     build:
       context: .
       dockerfile: services/influx/Dockerfile
+    env_file:
+      - services/influx/env_variables
     networks:
       default:
         aliases:
@@ -44,15 +46,31 @@ services:
     container_name: telegraf
     image: telegraf:1.25.0
     restart: always
-    environment:
-      - INFLUX_TOKEN=Jv-gTpRi9QFOdr8r323R089hVLX1gmELYPI7cDBkVxdXNjxfSWPPtmn1Cri7dmtmozblGkvKBvLDay8YiL4DOg==
-    command: --config http://influxdb:8086/api/v2/telegrafs/0aaaf9d9ba31c000
+    build:
+      context: .
+      dockerfile: services/telegraf/Dockerfile    
     depends_on:
       - database
-    
+      - broker
+  
+  analytics:
+    container_name: analitica
+    image: analitica_image
+    restart: always
+    build:
+      context: .
+      dockerfile: services/analytics/Dockerfile
+    depends_on:
+      - database
+      - broker
+      - telegraf
+
 networks:
   default:
     ipam:
       driver: default
       config:
-        - subnet: "172.16.0.0/16"
+        - subnet: "10.0.0.0/8"
+
+
+
